@@ -1,0 +1,66 @@
+"""Chargement mis en cache des données et des scores."""
+
+from __future__ import annotations
+
+import pandas as pd
+import streamlit as st
+
+from atlas_hympyr.config import get, load_settings, produits
+from atlas_hympyr.data_access import Atlas, load_atlas
+from atlas_hympyr.demo import demo_penalites
+from atlas_hympyr.paths import PENALITES_FILE
+from atlas_hympyr.scoring import (
+    add_difficulte,
+    add_potentiel,
+    add_temps_ajuste,
+    load_penalites,
+)
+
+
+@st.cache_resource(show_spinner="Chargement de l'atlas…")
+def get_atlas() -> Atlas:
+    return load_atlas()
+
+
+@st.cache_resource
+def get_settings() -> dict:
+    return load_settings()
+
+
+def get_penalites() -> pd.DataFrame:
+    atlas = get_atlas()
+    return demo_penalites() if atlas.is_demo else load_penalites(PENALITES_FILE)
+
+
+def has_penalites() -> bool:
+    pen = get_penalites()
+    return bool((pen["coef"] > 1.0).any()) if not pen.empty else False
+
+
+def poids_difficulte() -> dict[str, float]:
+    return {k: float(v) for k, v in (get(get_settings(), "scoring.poids_difficulte", {}) or {}).items()}
+
+
+def poids_priorite() -> dict[str, float]:
+    return {k: float(v) for k, v in (get(get_settings(), "scoring.poids_priorite", {}) or {}).items()}
+
+
+@st.cache_data(show_spinner=False)
+def enriched(depot_id: str | None, heure: float | None) -> pd.DataFrame:
+    """Table des communes avec potentiels, trajets depuis le dépôt et difficulté d'accès."""
+    atlas = get_atlas()
+    cfg = get_settings()
+    df = add_potentiel(atlas.table(depot_id), produits(cfg))
+    temps_col = "trajet_min"
+    if heure is not None and "trajet_min" in df.columns:
+        df = add_temps_ajuste(df, get_penalites(), heure)
+        temps_col = "trajet_ajuste_min"
+    return add_difficulte(df, poids_difficulte(), temps_col)
+
+
+def produits_cfg() -> dict[str, dict]:
+    return produits(get_settings())
+
+
+def libelle(key: str) -> str:
+    return produits_cfg().get(key, {}).get("libelle", key)

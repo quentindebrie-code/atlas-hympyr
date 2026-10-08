@@ -1,0 +1,10 @@
+[theme]
+base = "light"
+primaryColor = "#256abf"
+
+[server]
+headless = true
+# Aucune donnée n'est envoyée à des services tiers par l'application elle-même.
+
+[browser]
+gatherUsageStats = false

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# Données : volumineuses et reconstructibles (python -m atlas_hympyr.etl.build)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Secrets et environnement local
+.env
+.env.*
+*.pem
+secrets.toml
+.streamlit/secrets.toml
+
+# Éditeurs / OS
+.idea/
+.vscode/
+.DS_Store

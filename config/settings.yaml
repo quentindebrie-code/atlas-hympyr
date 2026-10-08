@@ -1,0 +1,122 @@
+# Configuration de l'Atlas territorial Hympyr.
+# Tout ce qui est marqué « À RENSEIGNER » doit être complété avant de construire les données réelles
+# (python -m atlas_hympyr.etl.build). L'application fonctionne sans cela en mode démonstration.
+
+perimetre:
+  # Zone desservie : 7 départements (codes INSEE)
+  departements: ["09", "11", "31", "32", "65", "81", "82"]
+
+# Dépôts de départ des tournées (coordonnées WGS84). À RENSEIGNER avec les dépôts réels.
+# Exemple (à ne pas laisser tel quel) :
+#   - {id: "depot-1", nom: "Dépôt principal", lat: 0.0, lon: 0.0}
+depots: []
+
+routage:
+  # "estimation" : distance à vol d'oiseau x coefficient de détour (hors ligne, approximatif)
+  # "osrm"       : serveur OSRM auto-hébergé sur extrait OpenStreetMap (recommandé en réel)
+  fournisseur: estimation
+  estimation:
+    vitesse_moyenne_kmh: 55      # à calibrer sur les temps de tournée observés
+    coef_detour: 1.30            # rapport distance routière / vol d'oiseau, à calibrer
+  osrm:
+    url: "http://localhost:5000"
+    profil: "driving"
+    timeout_s: 20
+  # Multiplicateur appliqué aux durées pour tenir compte des poids lourds (profil voiture sinon)
+  coef_temps_poids_lourd: 1.0    # À CALIBRER avec le responsable exploitation
+  # Raster d'altitude (GeoTIFF) pour dénivelé et altitude : RGE ALTI, BD ALTI ou équivalent ouvert
+  mnt_geotiff: null
+
+scoring:
+  # Poids des composantes de la difficulté d'accès (renormalisés si une composante est absente)
+  poids_difficulte:
+    temps: 0.35
+    sinuosite: 0.20
+    altitude: 0.15
+    denivele: 0.20
+    trafic: 0.10
+  # Poids de la priorité de ciblage (réglables dans l'application)
+  poids_priorite:
+    potentiel: 0.50
+    densite: 0.20
+    facilite: 0.30
+
+# Produits : indicateur = colonne de la table des communes utilisée comme proxy de la demande
+produits:
+  fioul:
+    libelle: "Fioul domestique"
+    segment: "Particuliers"
+    indicateur: rp_fioul
+    unite: "résidences principales chauffées au fioul"
+  granules:
+    libelle: "Granulés de bois"
+    segment: "Particuliers"
+    indicateur: rp_bois
+    unite: "résidences principales chauffées au bois"
+  gnr:
+    libelle: "GNR"
+    segment: "Entreprises et collectivités"
+    indicateur: surf_agri_ha
+    unite: "hectares agricoles déclarés"
+  gasoil_routier:
+    libelle: "Gasoil routier"
+    segment: "Entreprises et collectivités"
+    indicateur: pl_entreprises
+    unite: "poids lourds d'entreprises"
+  adblue:
+    libelle: "AdBlue"
+    segment: "Entreprises et collectivités"
+    indicateur: pl_diesel_recents
+    unite: "poids lourds diesel récents"
+
+sources:
+  # Recensement Insee (résidences principales par combustible de chauffage), fichier communal.
+  # Outil d'aide : python -m atlas_hympyr.etl.colonnes <fichier> --cherche fioul bois
+  insee_logement:
+    fichier: data/raw/insee_logement.csv
+    separateur: ";"
+    millesime: "2022"
+    colonnes:                    # À RENSEIGNER (noms exacts des colonnes du fichier téléchargé)
+      code: null
+      rp_total: null
+      rp_fioul: null
+      rp_bois: null
+
+  # SDES, parc de véhicules routiers (export communal DiDo, CSV)
+  sdes_parc:
+    fichier: data/raw/sdes_parc.csv
+    separateur: ";"
+    millesime: "2026-01-01"
+    annee_colonne: null          # optionnel : colonne « année » si le fichier en contient plusieurs
+    annee_valeur: null           # optionnel : année à retenir (ex. "2026")
+    colonnes:                    # À RENSEIGNER
+      code: null
+      nombre: null
+      genre: null
+      energie: null
+      utilisateur: null
+      crit_air: null
+    filtres:                     # À RENSEIGNER : valeurs exactes présentes dans le fichier
+      pl_entreprises:
+        genre: []
+        utilisateur: []
+      pl_diesel_recents:
+        genre: []
+        energie: []
+        crit_air: []
+
+  # Registre parcellaire graphique (IGN), parcelles ou îlots, GeoPackage/Shapefile
+  rpg:
+    fichier: data/raw/rpg.gpkg
+    couche: null
+    crs_defaut: 2154             # utilisé uniquement si le fichier n'a pas de CRS déclaré
+    colonne_groupe_culture: null # optionnel
+    groupes_exclus: []           # optionnel : groupes de cultures à ne pas compter
+
+  # Trafic (optionnel) : CSV code;tmja produit par vos soins à partir des cartes DREAL
+  trafic:
+    fichier: data/raw/trafic_communes.csv
+
+geo:
+  api_communes: "https://geo.api.gouv.fr/departements/{dep}/communes"
+  simplification_deg: 0.0005     # simplification des contours pour l'affichage web
