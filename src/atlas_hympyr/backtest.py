@@ -40,7 +40,8 @@ def evaluate_potential(
     total = float(merged["volume"].sum())
     if total <= 0 or merged[col].nunique() < 2:
         raise ValueError("Données insuffisantes pour évaluer (volume nul ou potentiel constant)")
-    rho = float(merged[col].corr(merged["volume"], method="spearman"))
+    # Spearman = Pearson sur les rangs (évite la dépendance à scipy que pandas exige sinon)
+    rho = float(merged[col].rank().corr(merged["volume"].rank()))
     top = merged.sort_values(col, ascending=False).head(max(1, int(len(merged) * seuil_communes)))
     return {
         "produit": produit,
