@@ -101,32 +101,40 @@ sources:
       code: code_insee
       altitude: altitude_moyenne
 
-  # SDES, parc de véhicules routiers (export communal DiDo, CSV). URL vérifiée ; colonnes et valeurs
-  # NON vérifiées (documentation muette) : après téléchargement, lister avec
-  #   python -m atlas_hympyr.etl.colonnes data/raw/sdes_parc.csv
-  #   python -m atlas_hympyr.etl.colonnes data/raw/sdes_parc.csv --valeurs <colonne>
+  # SDES, parc de véhicules routiers (export communal DiDo, CSV, séparateur « ; »).
+  # En-tête et valeurs relevés sur le fichier réel le 08/10/2026 (format « large » : une colonne
+  # PARC_<année> par année, donc pas de filtre d'année : on choisit la colonne).
+  # PARC_2024 = dernier millésime définitif pour les poids lourds (2025 et 2026 : provisoires).
+  # Les rangs changent peu d'une année à l'autre ; pour un millésime plus récent, changer `nombre`.
   sdes_parc:
     fichier: data/raw/sdes_parc.csv
     url: "https://data.statistiques.developpement-durable.gouv.fr/dido/api/v1/datafiles/1582861b-e042-4490-9161-6429d8229703/csv"
     separateur: ";"
-    millesime: "2026-01-01"
-    annee_colonne: null          # optionnel : colonne « année » si le fichier en contient plusieurs
-    annee_valeur: null           # optionnel : année à retenir (ex. "2026")
-    colonnes:                    # À RENSEIGNER
-      code: null
-      nombre: null
-      genre: null
-      energie: null
-      utilisateur: null
-      crit_air: null
-    filtres:                     # À RENSEIGNER : valeurs exactes présentes dans le fichier
+    millesime: "2024-01-01"
+    annee_colonne: null
+    annee_valeur: null
+    colonnes:
+      code: COMMUNE_CODE
+      nombre: PARC_2024
+      genre: GROUPE               # valeurs : PL, TCP, VP, VUL
+      energie: CARBURANT          # Diesel, Diesel HNR, Diesel HR, Essence, Electrique, Gaz...
+      utilisateur: STATUT_UTILISATEUR   # Particulier, Professionel (une seule lettre n, comme dans le fichier)
+      crit_air: CRIT_AIR          # Crit'Air 1 ... 5, Crit'Air E, Inconnu, Non classé
+    filtres:
+      # Gasoil routier : poids lourds diesel détenus par des professionnels.
       pl_entreprises:
-        genre: []
-        utilisateur: []
+        genre: ["PL"]
+        energie: ["Diesel", "Diesel HNR", "Diesel HR"]
+        utilisateur: ["Professionel"]
+      # AdBlue : poids lourds diesel professionnels Crit'Air 2 et 3.
+      # HYPOTHÈSE (pratique de place, non vérifiée ici) : pour un poids lourd diesel, Crit'Air 2 ~ Euro VI
+      # et Crit'Air 3 ~ Euro IV/V, normes où la dépollution SCR (AdBlue) est la solution dominante.
+      # À faire confirmer par l'exploitation ou un revendeur de véhicules.
       pl_diesel_recents:
-        genre: []
-        energie: []
-        crit_air: []
+        genre: ["PL"]
+        energie: ["Diesel", "Diesel HNR", "Diesel HR"]
+        utilisateur: ["Professionel"]
+        crit_air: ["Crit'Air 2", "Crit'Air 3"]
 
   # Registre parcellaire graphique (IGN), parcelles ou îlots, GeoPackage/Shapefile
   rpg:

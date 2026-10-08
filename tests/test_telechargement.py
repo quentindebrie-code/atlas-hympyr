@@ -134,3 +134,35 @@ def test_altitude_loader(tmp_path):
     df = load_altitude(cfg, ["09", "31"]).set_index("code")
     assert set(df.index) == {"09001", "09002", "31555"}
     assert df.loc["09001", "altitude_m"] == 640 and pd.isna(df.loc["09002", "altitude_m"])
+
+
+def test_repo_config_sdes_matches_real_file_format(tmp_path):
+    """La config livrée doit fonctionner sur un fichier au format réel relevé le 08/10/2026."""
+    import yaml
+
+    from atlas_hympyr.etl.sdes_parc import load_sdes_parc
+
+    cfg = yaml.safe_load(open("config/settings.yaml", encoding="utf-8"))["sources"]["sdes_parc"]
+    header = "COMMUNE_CODE;COMMUNE_NOM;CARBURANT;CRIT_AIR;STATUT_UTILISATEUR;GROUPE;CATEGORIE;" + ";".join(
+        f"PARC_{y}" for y in range(2011, 2027)
+    )
+
+    def row(code, carb, crit, statut, groupe, cat, n):
+        return f"{code};X;{carb};{crit};{statut};{groupe};{cat};" + ";".join([str(n)] * 16)
+
+    rows = [
+        row("31555", "Diesel", "Crit'Air 2", "Professionel", "PL", "CAMION", 10),
+        row("31555", "Diesel", "Crit'Air 4", "Professionel", "PL", "CAMION", 3),
+        row("31555", "Essence", "Crit'Air 1", "Professionel", "PL", "CAMION", 99),  # exclu : pas diesel
+        row("31555", "Diesel", "Crit'Air 2", "Particulier", "VP", "VP", 500),  # exclu : voiture
+        row("09001", "Diesel HR", "Crit'Air 3", "Professionel", "PL", "AUTREPL", 2),
+        row("75056", "Diesel", "Crit'Air 2", "Professionel", "PL", "CAMION", 7),  # hors périmètre
+    ]
+    f = tmp_path / "sdes.csv"
+    f.write_text("\n".join([header, *rows]) + "\n", encoding="utf-8")
+    cfg["fichier"] = str(f)
+    df, stats = load_sdes_parc(cfg, ["09", "31"])
+    out = df.set_index("code")
+    assert out.loc["31555", "pl_entreprises"] == 13 and out.loc["31555", "pl_diesel_recents"] == 10
+    assert out.loc["09001", "pl_entreprises"] == 2 and out.loc["09001", "pl_diesel_recents"] == 2
+    assert "75056" not in out.index

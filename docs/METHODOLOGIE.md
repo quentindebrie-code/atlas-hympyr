@@ -14,8 +14,8 @@ affichées à côté des scores.
 | Fioul domestique | Résidences principales chauffées au fioul (recensement Insee) | Consommation réelle (surface, isolation), résidences secondaires, tertiaire, cuves collectives |
 | Granulés | Résidences principales chauffées avec un combustible « autre » (recensement Insee, `P22_RP_CAUT`) | **Proxy faible.** La base communale Insee n'a pas de variable « bois » (fioul, électricité, gaz de ville, gaz bouteille/citerne, autre). « Autre » mélange bois (bûches comprises), charbon et divers ; il ne distingue pas poêles à granulés et cheminées. Le test contre les ventes réelles décide s'il reste affiché |
 | GNR | Surface agricole déclarée (RPG) | Intensité de consommation selon les cultures, élevage, **chantiers et travaux publics (hors RPG)** |
-| Gasoil routier | Poids lourds d'entreprises (SDES, parc par commune) | Où ils s'approvisionnent réellement (stations, cartes carburant, dépôts) |
-| AdBlue | Poids lourds diesel récents (SDES) | Idem ; le seuil « récent » dépend du filtre Crit'Air choisi |
+| Gasoil routier | Poids lourds diesel détenus par des professionnels (SDES, parc par commune, millésime 2024) | Où ils s'approvisionnent réellement (stations, cartes carburant, dépôts) |
+| AdBlue | Poids lourds diesel professionnels Crit'Air 2 et 3 (SDES) | Idem. **Hypothèse non vérifiée** : Crit'Air 2 ~ Euro VI et 3 ~ Euro IV/V, normes où la dépollution SCR (AdBlue) domine ; à faire confirmer |
 
 Pour chaque produit : `vol_` (volume estimé), `pot_` (rang du volume, 0-100), `dens_` (volume par
 km²) et `densp_` (rang de la densité). **Une commune sans demande vaut 0** et ne participe pas au
