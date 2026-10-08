@@ -79,7 +79,7 @@ def test_insee_loader(tmp_path):
     cfg = {
         "fichier": str(f),
         "separateur": ";",
-        "colonnes": {"code": "CODGEO", "rp_total": "TOT", "rp_fioul": "FIOUL", "rp_bois": "BOIS"},
+        "colonnes": {"code": "CODGEO", "rp_total": "TOT", "rp_fioul": "FIOUL", "rp_autre": "BOIS"},
     }
     df = load_insee_logement(cfg, ["09", "31"]).set_index("code")
     assert set(df.index) == {"09001", "31555"}  # Paris exclu, zéro de tête restauré
@@ -90,7 +90,7 @@ def test_insee_loader_requires_mapping_and_file(tmp_path):
     with pytest.raises(ConfigError, match="non renseignées"):
         load_insee_logement({"fichier": "x", "colonnes": {"code": None, "rp_fioul": None}}, ["31"])
     cfg = {"fichier": str(tmp_path / "absent.csv"), "colonnes": {"code": "A", "rp_fioul": "B"}}
-    with pytest.raises(FileNotFoundError, match="Télécharger"):
+    with pytest.raises(FileNotFoundError, match="télécharger"):
         load_insee_logement(cfg, ["31"])
 
 
@@ -327,7 +327,7 @@ def test_end_to_end_build_offline(tmp_path):
         "sources": {
             "insee_logement": {
                 "fichier": str(insee),
-                "colonnes": {"code": "CODGEO", "rp_total": "TOT", "rp_fioul": "FIOUL", "rp_bois": None},
+                "colonnes": {"code": "CODGEO", "rp_total": "TOT", "rp_fioul": "FIOUL", "rp_autre": None},
             },
             "sdes_parc": {"fichier": str(tmp_path / "absent.csv"), "colonnes": {}},
             "rpg": {"fichier": str(tmp_path / "absent.gpkg")},

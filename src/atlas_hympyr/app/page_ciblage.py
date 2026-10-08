@@ -33,6 +33,9 @@ def render() -> None:
         return
 
     produit = st.sidebar.selectbox("Produit", dispo, format_func=libelle, key="cib_produit")
+    avert = produits_cfg()[produit].get("avertissement")
+    if avert:
+        st.warning(f"Fiabilité {produits_cfg()[produit].get('fiabilite', 'à vérifier')} — {avert}")
     defaut = poids_priorite()
     st.sidebar.markdown("**Poids de la priorité**")
     w_pot = st.sidebar.slider("Potentiel", 0.0, 1.0, float(defaut.get("potentiel", 0.5)), 0.05, key="cib_wp")

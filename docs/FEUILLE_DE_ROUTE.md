@@ -6,7 +6,7 @@ Les durées sont des **estimations** pour une personne à temps partiel sur le s
 
 - Application complète sur territoire de démonstration synthétique (6 vues, export CSV).
 - Scripts d'import des données réelles, testés sur fichiers fictifs.
-- Documentation, tests (57), CI GitHub Actions, Dockerfile.
+- Documentation, tests (64), CI GitHub Actions, Dockerfile.
 
 *Limite : jamais exécuté sur les vrais fichiers.*
 

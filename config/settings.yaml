@@ -51,8 +51,13 @@ produits:
   granules:
     libelle: "Granulés de bois"
     segment: "Particuliers"
-    indicateur: rp_bois
-    unite: "résidences principales chauffées au bois"
+    indicateur: rp_autre
+    unite: "résidences principales chauffées avec un combustible « autre » (bois, charbon…)"
+    fiabilite: faible
+    avertissement: >-
+      Proxy faible : l'Insee ne publie pas de variable « bois » par commune. « Autre combustible »
+      regroupe bois (bûches comprises), charbon et divers. À valider avec les ventes de granulés
+      avant tout usage décisionnel.
   gnr:
     libelle: "GNR"
     segment: "Entreprises et collectivités"
@@ -71,20 +76,38 @@ produits:
 
 sources:
   # Recensement Insee (résidences principales par combustible de chauffage), fichier communal.
-  # Outil d'aide : python -m atlas_hympyr.etl.colonnes <fichier> --cherche fioul bois
+  # Téléchargement : python -m atlas_hympyr.etl.telecharger
+  # Colonnes vérifiées dans la documentation Insee (base-cc-logement-2022) ; le fichier réel n'a
+  # pas pu être ouvert depuis l'environnement de développement : l'en-tête est contrôlé à la lecture.
   insee_logement:
     fichier: data/raw/insee_logement.csv
+    url: "https://www.insee.fr/fr/statistiques/fichier/8581474/base-cc-logement-2022_csv.zip"
     separateur: ";"
     millesime: "2022"
-    colonnes:                    # À RENSEIGNER (noms exacts des colonnes du fichier téléchargé)
-      code: null
-      rp_total: null
-      rp_fioul: null
-      rp_bois: null
+    colonnes:
+      code: CODGEO
+      rp_total: P22_RP
+      rp_fioul: P22_RP_CFIOUL
+      rp_autre: P22_RP_CAUT
 
-  # SDES, parc de véhicules routiers (export communal DiDo, CSV)
+  # Altitude des communes (data.gouv.fr, « Liste des communes de France 2026 », Licence Ouverte v2) :
+  # colonnes code_insee, altitude_moyenne, altitude_minimale, altitude_maximale (vérifiées).
+  # Sert d'altitude de repli quand aucun MNT n'est configuré.
+  altitude:
+    fichier: data/raw/communes_france.csv
+    url: "https://static.data.gouv.fr/resources/communes-et-villes-de-france-en-csv-excel-json-parquet-et-feather/20260617-155950/communes-france-2026.csv"
+    separateur: ","
+    colonnes:
+      code: code_insee
+      altitude: altitude_moyenne
+
+  # SDES, parc de véhicules routiers (export communal DiDo, CSV). URL vérifiée ; colonnes et valeurs
+  # NON vérifiées (documentation muette) : après téléchargement, lister avec
+  #   python -m atlas_hympyr.etl.colonnes data/raw/sdes_parc.csv
+  #   python -m atlas_hympyr.etl.colonnes data/raw/sdes_parc.csv --valeurs <colonne>
   sdes_parc:
     fichier: data/raw/sdes_parc.csv
+    url: "https://data.statistiques.developpement-durable.gouv.fr/dido/api/v1/datafiles/1582861b-e042-4490-9161-6429d8229703/csv"
     separateur: ";"
     millesime: "2026-01-01"
     annee_colonne: null          # optionnel : colonne « année » si le fichier en contient plusieurs

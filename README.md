@@ -26,33 +26,46 @@ calculés à partir de données officielles et ouvertes. Aucune donnée client n
 python -m venv .venv && source .venv/bin/activate     # Python >= 3.11
 pip install -e ".[dev]"
 streamlit run app.py
-pytest                                                # 57 tests
+pytest                                                # 64 tests
 ```
 
 ## Passer aux données réelles
 
+À lancer **sur une machine ayant accès à Internet** (poste de travail, serveur). Durée estimée : 30 à
+60 minutes la première fois, dont l'essentiel pour repérer les colonnes SDES.
+
 1. `pip install -e ".[etl]"`
-2. Télécharger les fichiers sources dans `data/raw/` (liste, liens et statut de vérification :
-   [`docs/SOURCES.md`](docs/SOURCES.md)).
-3. Repérer les colonnes avec l'aide fournie :
+2. Télécharger les fichiers ouverts (Insee, altitude, SDES) dans `data/raw/` :
    ```bash
-   python -m atlas_hympyr.etl.colonnes data/raw/insee_logement.csv --cherche fioul bois
-   python -m atlas_hympyr.etl.colonnes data/raw/sdes_parc.csv --valeurs GENRE
+   python -m atlas_hympyr.etl.telecharger
    ```
-4. Compléter `config/settings.yaml` : colonnes et filtres des sources, **coordonnées des dépôts**
-   (`depots`), éventuellement le serveur OSRM et le MNT.
-5. Construire l'atlas (les étapes non configurées sont ignorées avec un message, `--strict` pour
+   Insee et altitude sont déjà paramétrés dans `config/settings.yaml` (colonnes vérifiées dans la
+   documentation ; l'en-tête réel est contrôlé à la lecture, avec un message explicite en cas d'écart).
+3. **SDES (gasoil routier, AdBlue) : à paramétrer une fois.** La documentation en ligne ne donne pas
+   les noms de colonnes ni les valeurs. Les lister puis compléter `sources.sdes_parc` :
+   ```bash
+   python -m atlas_hympyr.etl.colonnes data/raw/sdes_parc.csv
+   python -m atlas_hympyr.etl.colonnes data/raw/sdes_parc.csv --valeurs <colonne_genre>
+   ```
+4. **RPG (GNR) : téléchargement manuel** (URL officielle non vérifiée), puis `sources.rpg`. Sans lui,
+   le GNR est simplement indisponible.
+5. Renseigner les **coordonnées des dépôts** (`depots`) dans `config/settings.yaml`.
+6. Construire l'atlas (les étapes non configurées sont ignorées avec un message, `--strict` pour
    échouer) :
    ```bash
    python -m atlas_hympyr.etl.build
    ```
    Le rapport de **couverture** par source s'affiche : en dessous de 95 % de communes
    appariées, corriger avant d'utiliser (millésime des codes communes, zéros de tête).
-6. `streamlit run app.py` : le bandeau de démonstration disparaît.
-7. **Valider le potentiel contre les ventes réelles** (voir `docs/CALIBRATION.md`) :
+7. `streamlit run app.py` : le bandeau de démonstration disparaît.
+8. **Valider le potentiel contre les ventes réelles** (voir `docs/CALIBRATION.md`) :
    ```bash
    python -m atlas_hympyr.backtest ventes_fioul_par_commune.csv --produit fioul
    ```
+
+**Granulés : proxy faible.** L'Insee ne publie pas de variable « bois » par commune ; l'atlas utilise
+« autre combustible » (bois, charbon, divers). L'application l'affiche en avertissement. À valider
+au test (étape 8) ou à retirer.
 
 ## Ce que l'outil est, et n'est pas
 
@@ -80,7 +93,7 @@ src/atlas_hympyr/
   etl/                      import : communes, Insee, SDES, RPG, MNT, routage, build
   app/                      pages Streamlit
 docs/                       méthodologie, sources, sécurité/RGPD, calibration, note direction, feuille de route
-tests/                      57 tests (logique, import sur fichiers fictifs, application)
+tests/                      64 tests (logique, import sur fichiers fictifs, application)
 ```
 
 ## Déploiement

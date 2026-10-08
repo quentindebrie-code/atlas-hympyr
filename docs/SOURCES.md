@@ -3,13 +3,14 @@
 **Légende du statut.** *Vérifié* : consulté pendant le développement (08/10/2026) via la
 documentation en ligne. *Non vérifié* : connaissance générale, à confirmer avant usage. Les
 fichiers eux-mêmes n'ont **jamais** pu être téléchargés depuis l'environnement de développement
-(accès réseau bloqué) : les noms de colonnes sont donc toujours « à confirmer ».
+(accès réseau bloqué) : un « vérifié » porte sur la documentation, pas sur le fichier.
 
 | Source | Usage | Maille | Statut | Point d'attention |
 |---|---|---|---|---|
-| Insee, recensement 2022, combustible principal de chauffage | `rp_fioul`, `rp_bois`, `rp_total` | Commune | Existence vérifiée (études Insee par commune, base logement) ; colonnes à confirmer | Le fioul est plus répandu en zone rurale (Insee Première n° 2088, janv. 2026) ; « bois » inclut les bûches |
-| SDES, parc de véhicules routiers | `pl_entreprises`, `pl_diesel_recents` | Commune | Contenu vérifié : genre, motorisation, Crit'Air, PTAC, utilisateur et secteur d'activité, jusqu'au 01/01/2026 ; colonnes et valeurs à confirmer | Diffusé via DiDo depuis mai 2025 (explorateur + API) ; données récentes provisoires ; localisation = adresse de la carte grise |
-| RPG (IGN / ASP) | `surf_agri_ha` | Parcelle ou îlot | Description vérifiée (parcelles agricoles déclarées PAC, version anonymisée) ; téléchargement à confirmer | Surfaces recalculées par l'outil depuis la géométrie ; les exploitations non déclarées PAC sont absentes |
+| Insee, base-cc-logement-2022 (CSV zippé) | `rp_fioul` (`P22_RP_CFIOUL`), `rp_autre` (`P22_RP_CAUT`), `rp_total` (`P22_RP`), code `CODGEO` | Commune | **URL et noms de colonnes vérifiés** dans la documentation Insee (08/10/2026) ; fichier non ouvert, en-tête contrôlé à la lecture | **Pas de variable bois** ; fioul plus répandu en zone rurale (Insee Première n° 2088, janv. 2026) |
+| data.gouv.fr, « Liste des communes de France 2026 » (Licence Ouverte v2) | `altitude_m` (`altitude_moyenne`, code `code_insee`) | Commune | **URL et colonnes vérifiés** dans la documentation du jeu ; fichier non ouvert | Altitude de repli quand aucun MNT n'est configuré ; valeurs manquantes possibles |
+| SDES, parc de véhicules routiers | `pl_entreprises`, `pl_diesel_recents` | Commune | **URL du CSV communal vérifiée** (DiDo, 2011 à 2026) ; **colonnes et valeurs non vérifiables** (documentation muette), à lister avec `etl.colonnes` | Diffusé via DiDo depuis mai 2025 (explorateur + API) ; données récentes provisoires ; localisation = adresse de la carte grise |
+| RPG (IGN / ASP) | `surf_agri_ha` | Parcelle ou îlot | Description vérifiée (parcelles agricoles déclarées PAC, version anonymisée) ; **URL de téléchargement officielle non vérifiée** : récupération manuelle | Surfaces recalculées par l'outil depuis la géométrie ; les exploitations non déclarées PAC sont absentes |
 | API Découpage administratif (geo.api.gouv.fr) | Contours, noms, population | Commune | Endpoint et paramètres vérifiés (`/departements/{code}/communes`, `format=geojson`, `geometry=contour`) ; noms des propriétés renvoyées **non vérifiés** (le parseur échoue avec un message clair s'ils diffèrent) | Surface et centroïde recalculés depuis la géométrie |
 | DREAL Occitanie, cartes de trafic | `trafic_idx` (optionnel, saisie manuelle) | Poste de comptage, réseau national | Vérifié : publications **PDF** annuelles (trafic moyen journalier annuel et mensuel, part de poids lourds) | **Pas de profil horaire ouvert vérifié** : les heures d'affluence passent par des coefficients de calibration |
 | MNT IGN (RGE ALTI / BD ALTI) ou équivalent | Altitude, dénivelé | Raster | Non vérifié | À télécharger ; l'outil lit tout GeoTIFF (n'importe quel CRS) |

@@ -1,6 +1,6 @@
 """Aide au paramétrage : liste les colonnes d'un fichier et les valeurs d'une colonne.
 
-python -m atlas_hympyr.etl.colonnes fichier.csv --cherche fioul bois
+python -m atlas_hympyr.etl.colonnes fichier.csv --cherche fioul autre
 python -m atlas_hympyr.etl.colonnes fichier.csv --valeurs GENRE
 """
 

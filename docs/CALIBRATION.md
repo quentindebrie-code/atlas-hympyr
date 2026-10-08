@@ -58,7 +58,7 @@ Ces seuils sont un repère proposé, pas une norme : à valider avec la directio
 sur un usage.
 
 Un résultat faible n'est pas un échec du projet : il dit que le proxy ne suffit pas pour ce produit
-(typiquement les granulés, où le chauffage « bois » inclut les bûches).
+(typiquement les granulés, dont le proxy « autre combustible » est le plus fragile).
 
 ## 4. Sensibilité des poids
 

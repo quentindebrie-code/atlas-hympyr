@@ -39,6 +39,8 @@ def render() -> None:
     d = df[df["dept"].isin(sel)] if sel else df
     p = produits_cfg()[produit]
     st.caption(f"{p['libelle']} · {p['segment']} · proxy : {p['unite']}")
+    if p.get("avertissement"):
+        st.warning(f"Fiabilité {p.get('fiabilite', 'à vérifier')} — {p['avertissement']}")
 
     fig = ui.carte(
         d,

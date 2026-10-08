@@ -12,7 +12,7 @@ affichées à côté des scores.
 | Produit | Proxy du volume estimé | Ce que le proxy ne dit pas |
 |---|---|---|
 | Fioul domestique | Résidences principales chauffées au fioul (recensement Insee) | Consommation réelle (surface, isolation), résidences secondaires, tertiaire, cuves collectives |
-| Granulés | Résidences principales chauffées au bois (recensement Insee) | **Le bois inclut les bûches** : le proxy surestime les granulés ; il ne distingue pas poêles à granulés et cheminées. Recoupement à envisager avec d'autres sources |
+| Granulés | Résidences principales chauffées avec un combustible « autre » (recensement Insee, `P22_RP_CAUT`) | **Proxy faible.** La base communale Insee n'a pas de variable « bois » (fioul, électricité, gaz de ville, gaz bouteille/citerne, autre). « Autre » mélange bois (bûches comprises), charbon et divers ; il ne distingue pas poêles à granulés et cheminées. Le test contre les ventes réelles décide s'il reste affiché |
 | GNR | Surface agricole déclarée (RPG) | Intensité de consommation selon les cultures, élevage, **chantiers et travaux publics (hors RPG)** |
 | Gasoil routier | Poids lourds d'entreprises (SDES, parc par commune) | Où ils s'approvisionnent réellement (stations, cartes carburant, dépôts) |
 | AdBlue | Poids lourds diesel récents (SDES) | Idem ; le seuil « récent » dépend du filtre Crit'Air choisi |

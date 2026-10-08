@@ -5,7 +5,7 @@
     python -m atlas_hympyr.etl.build --ignorer rpg   # sans le RPG
     python -m atlas_hympyr.etl.build --strict        # échoue à la première étape non configurée
 
-Étapes : communes (réseau) -> insee -> sdes -> rpg -> trafic (optionnel) -> trajets par dépôt.
+Étapes : communes (réseau) -> insee -> sdes -> rpg -> trafic (optionnel) -> altitude -> trajets par dépôt.
 Une étape non configurée ou dont le fichier est absent est ignorée (le produit correspondant sera
 simplement indisponible dans l'application), sauf avec --strict. Un rapport de couverture est écrit
 dans meta.json et affiché.
@@ -73,6 +73,8 @@ def _load_trafic(cfg_source: dict[str, Any], departements: list[str]) -> pd.Data
 
 def _abs(cfg_source: dict[str, Any]) -> dict[str, Any]:
     out = dict(cfg_source)
+    if not out.get("fichier"):
+        raise ConfigError("Source non configurée (clé « fichier » absente dans config/settings.yaml)")
     p = Path(out["fichier"])
     out["fichier"] = str(p if p.is_absolute() else ROOT / p)
     return out
@@ -143,6 +145,13 @@ def build(
         sources_meta["rpg"] = {"fichier": Path(src["fichier"]).name}
         return load_rpg(src, geojson)
 
+    def altitude() -> pd.DataFrame:
+        from atlas_hympyr.etl.altitude import load_altitude
+
+        src = _abs(get(cfg, "sources.altitude", {}))
+        sources_meta["altitude"] = {"fichier": Path(src["fichier"]).name}
+        return load_altitude(src, deps)
+
     def trafic() -> pd.DataFrame:
         sources_meta["trafic"] = {}
         return _load_trafic(get(cfg, "sources.trafic", {"fichier": "data/raw/trafic_communes.csv"}), deps)
@@ -151,6 +160,9 @@ def build(
     stage("sdes", sdes)
     stage("rpg", rpg)
     stage("trafic", trafic)
+    # L'altitude du fichier communal sert de repli ; un MNT configuré la remplace plus bas.
+    if not get(cfg, "routage.mnt_geotiff"):
+        stage("altitude", altitude)
     table, report = assemble(communes, parts)
 
     # Altitude de la commune (MNT) si disponible
@@ -213,7 +225,9 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--config", default=None)
     ap.add_argument("--out", default=str(PROCESSED_DIR))
-    ap.add_argument("--ignorer", nargs="*", default=[], choices=["insee", "sdes", "rpg", "trafic", "mnt"])
+    ap.add_argument(
+        "--ignorer", nargs="*", default=[], choices=["insee", "sdes", "rpg", "trafic", "altitude", "mnt"]
+    )
     ap.add_argument("--strict", action="store_true")
     args = ap.parse_args(argv)
     try:

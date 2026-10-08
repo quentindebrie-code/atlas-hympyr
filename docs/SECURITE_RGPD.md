@@ -47,6 +47,6 @@ ajouté plus tard, ré-évaluer la classification et les obligations de transpar
 
 ## Pérennité
 
-Documentation dans `docs/`, tests automatisés (57), configuration externalisée : l'outil survit à
+Documentation dans `docs/`, tests automatisés (64), configuration externalisée : l'outil survit à
 son auteur si la procédure de mise à jour annuelle (voir `FEUILLE_DE_ROUTE.md`) est assignée à une
 personne nommée.
