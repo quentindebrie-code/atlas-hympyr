@@ -1,5 +1,6 @@
 """Tests de fumée de l'application Streamlit (mode démonstration, sans réseau)."""
 
+import os
 from pathlib import Path
 
 import pytest
@@ -73,3 +74,25 @@ def test_fiche_selects_a_commune():
     codes = at.selectbox(key="fiche_code").options
     at.selectbox(key="fiche_code").select_index(len(codes) // 2).run()
     assert not at.exception, [e.value for e in at.exception]
+
+
+def test_committed_real_atlas_renders_without_demo_banner():
+    """L'atlas construit versionné dans data/processed doit s'afficher sans bandeau de démonstration."""
+    import subprocess
+    import sys
+
+    repo = Path(__file__).resolve().parents[1]
+    if not (repo / "data" / "processed" / "atlas.parquet").exists():
+        pytest.skip("aucun atlas construit dans data/processed")
+    code = (
+        "from streamlit.testing.v1 import AppTest\n"
+        f"at = AppTest.from_file(r'{APP}', default_timeout=120).run()\n"
+        "assert not at.exception, [e.value for e in at.exception]\n"
+        "assert not any('DÉMONSTRATION' in e.value for e in at.error), 'bandeau de démonstration affiché'\n"
+        "print('OK')\n"
+    )
+    env = {**os.environ, "ATLAS_ROOT": str(repo)}
+    res = subprocess.run(
+        [sys.executable, "-I", "-c", code], capture_output=True, text=True, env=env, cwd=repo
+    )
+    assert res.returncode == 0 and "OK" in res.stdout, res.stdout[-500:] + res.stderr[-800:]
