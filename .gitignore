@@ -10,11 +10,11 @@ dist/
 .ruff_cache/
 .coverage
 
-# Données : volumineuses et reconstructibles (python -m atlas_hympyr.etl.build)
+# Données sources : volumineuses et reconstructibles (python -m atlas_hympyr.etl.build)
 data/raw/*
-data/processed/*
 !data/raw/.gitkeep
-!data/processed/.gitkeep
+# data/processed/ (atlas construit) est VERSIONNÉ : l'application hébergée en a besoin.
+# Ce choix suppose un dépôt PRIVÉ (voir docs/SECURITE_RGPD.md).
 
 # Secrets et environnement local
 .env

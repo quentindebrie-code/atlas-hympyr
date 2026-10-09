@@ -37,6 +37,7 @@ ajouté plus tard, ré-évaluer la classification et les obligations de transpar
 | Risque | Mesure en place ou recommandée |
 |---|---|
 | Accès non autorisé | **L'application n'a pas d'authentification intégrée.** La déployer uniquement sur le réseau interne ou derrière une passerelle d'authentification (proxy inverse avec SSO ou authentification basique sur HTTPS). Ne pas l'exposer directement sur Internet |
+| Atlas construit versionné (`data/processed/`) | Données ouvertes agrégées + coordonnées des dépôts. Acceptable uniquement dans un dépôt **privé**. Ne jamais rendre le dépôt public sans retirer ce dossier de l'historique |
 | Fuite de paramètres internes | Dépôt GitHub **privé** ; ne pas publier `config/settings.yaml` rempli (dépôts, coefficients) hors du dépôt privé |
 | Hébergement sur un service tiers (ex. Streamlit Community Cloud) | À éviter pour les données réelles configurées : hébergement interne ou UE de votre choix, selon la politique de l'entreprise |
 | Requêtes vers des tiers depuis le navigateur | Le fond de carte par défaut (CARTO) est chargé directement par le navigateur de l'utilisateur. `ATLAS_MAP_STYLE=white-bg` le supprime |
