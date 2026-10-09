@@ -1,0 +1,120 @@
+{
+  "mode": "reel",
+  "generated_at": "2026-10-09T07:01:03+00:00",
+  "routage": "estimation",
+  "coef_temps_poids_lourd": 1.0,
+  "sources": {
+    "insee_logement": {
+      "millesime": "2022"
+    },
+    "sdes_parc": {
+      "millesime": "2024-01-01",
+      "lignes_lues": 145465,
+      "valeurs_non_numeriques": 0
+    },
+    "rpg": {
+      "fichier": "rpg.gpkg"
+    },
+    "trafic": {},
+    "altitude": {
+      "fichier": "communes_france.csv"
+    }
+  },
+  "couverture": {
+    "insee": {
+      "communes_couvertes": 2780,
+      "taux_couverture": 1.0,
+      "codes_source_inconnus": 0,
+      "exemples_inconnus": [],
+      "absence_vaut_zero": false,
+      "alerte": false
+    },
+    "sdes": {
+      "communes_couvertes": 1970,
+      "taux_couverture": 0.7086,
+      "codes_source_inconnus": 5,
+      "exemples_inconnus": [
+        "11000",
+        "31000",
+        "32000",
+        "81000",
+        "82000"
+      ],
+      "absence_vaut_zero": true,
+      "alerte": false
+    },
+    "altitude": {
+      "communes_couvertes": 2780,
+      "taux_couverture": 1.0,
+      "codes_source_inconnus": 0,
+      "exemples_inconnus": [],
+      "absence_vaut_zero": false,
+      "alerte": false
+    }
+  },
+  "depots": [
+    {
+      "id": "saint-sulpice",
+      "nom": "Saint-Sulpice (carburant, granulés)",
+      "adresse": "490 route de Toulouse 81370 Saint-Sulpice-la-Pointe",
+      "lat": 43.781445,
+      "lon": 1.675185,
+      "adresse_trouvee": "490 Route de Toulouse 81370 Saint-Sulpice-la-Pointe",
+      "score": 0.96
+    },
+    {
+      "id": "labastide-saint-sernin",
+      "nom": "Labastide-Saint-Sernin (carburant)",
+      "adresse": "11 allée des Tailladettes 31620 Labastide-Saint-Sernin",
+      "lat": 43.733476,
+      "lon": 1.452493,
+      "adresse_trouvee": "11 Allée des Tailladettes 31620 Labastide-Saint-Sernin",
+      "score": 0.947
+    },
+    {
+      "id": "montrejeau",
+      "nom": "Montréjeau (carburant)",
+      "adresse": "21 avenue de Saint-Gaudens 31210 Montréjeau",
+      "lat": 43.087276,
+      "lon": 0.575468,
+      "adresse_trouvee": "21 Avenue de Saint-Gaudens 31210 Montréjeau",
+      "score": 0.958
+    },
+    {
+      "id": "lisle-sur-tarn",
+      "nom": "Lisle-sur-Tarn (granulés)",
+      "adresse": "227 rue du Capitaine Bastiani 81310 Lisle-sur-Tarn",
+      "lat": 43.848611,
+      "lon": 1.7907,
+      "adresse_trouvee": "227 Rue du Capitaine Bastiani 81310 Lisle-sur-Tarn",
+      "score": 0.954
+    },
+    {
+      "id": "saint-paul-cap-de-joux",
+      "nom": "Saint-Paul-Cap-de-Joux (lubrifiants et huiles)",
+      "adresse": "2 avenue du Relai 81220 Saint-Paul-Cap-de-Joux",
+      "lat": 43.645557,
+      "lon": 1.981989,
+      "adresse_trouvee": "2 Avenue du Relai 81220 Saint-Paul-Cap-de-Joux",
+      "score": 0.951
+    },
+    {
+      "id": "villemur-sur-tarn",
+      "nom": "Villemur-sur-Tarn (carburant)",
+      "adresse": "Avenue Franklin Roosevelt 31330 Villemur-sur-Tarn",
+      "lat": 43.859942,
+      "lon": 1.491745,
+      "adresse_trouvee": "Avenue du Président Roosevelt 31340 Villemur-sur-Tarn",
+      "score": 0.532
+    },
+    {
+      "id": "lannemezan",
+      "nom": "Lannemezan (carburant)",
+      "adresse": "Route de Tarbes 65300 Lannemezan",
+      "lat": 43.133873,
+      "lon": 0.40552,
+      "adresse_trouvee": "Route de Lannemezan 65300 Clarens",
+      "score": 0.628
+    }
+  ]
+}
