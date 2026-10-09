@@ -34,6 +34,13 @@ def banner(atlas: Atlas) -> None:
             "doit servir à aucune décision. Pour charger les vraies données, voir le README.",
             icon=None,
         )
+        from atlas_hympyr.paths import PROCESSED_DIR
+
+        presents = [n for n in ("atlas.parquet", "atlas.geojson") if (PROCESSED_DIR / n).exists()]
+        st.caption(
+            f"Diagnostic : dossier cherché `{PROCESSED_DIR}` ; fichiers trouvés : "
+            f"{', '.join(presents) if presents else 'aucun'} (il faut atlas.parquet et atlas.geojson)."
+        )
     else:
         gen = str(atlas.meta.get("generated_at", ""))[:10]
         routage = atlas.meta.get("routage", "estimation")
