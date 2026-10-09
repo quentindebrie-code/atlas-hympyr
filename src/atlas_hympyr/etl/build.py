@@ -30,12 +30,19 @@ SEUIL_COUVERTURE = 0.95
 
 
 def assemble(
-    communes: pd.DataFrame, parts: dict[str, pd.DataFrame]
+    communes: pd.DataFrame,
+    parts: dict[str, pd.DataFrame],
+    zero_si_absent: frozenset[str] | set[str] = frozenset(),
 ) -> tuple[pd.DataFrame, dict[str, dict[str, Any]]]:
     """Fusionne les sources sur le code commune et mesure la couverture de chacune.
 
     Un faible taux de correspondance trahit presque toujours un problème de millésime des codes
     (fusions de communes) ou de zéros de tête perdus : il est signalé, pas masqué.
+
+    Pour une source où l'absence d'une commune signifie « zéro » (ex. parc de poids lourds : une
+    commune sans aucun poids lourd n'apparaît pas), les valeurs manquantes sont remplacées par 0 et
+    l'alerte porte sur la part de codes de la source inconnus de la liste des communes, signal d'un
+    vrai problème de codes, plutôt que sur le taux de couverture.
     """
     out = communes.copy()
     report: dict[str, dict[str, Any]] = {}
@@ -43,15 +50,25 @@ def assemble(
     for name, part in parts.items():
         src_codes = set(part["code"])
         matched = len(codes & src_codes)
+        unknown = len(src_codes - codes)
+        zero = name in zero_si_absent
+        if zero:
+            alerte = bool(src_codes) and unknown / len(src_codes) > 1 - SEUIL_COUVERTURE
+        else:
+            alerte = bool(codes) and matched / len(codes) < SEUIL_COUVERTURE
         report[name] = {
             "communes_couvertes": matched,
             "taux_couverture": round(matched / len(codes), 4) if codes else 0.0,
-            "codes_source_inconnus": len(src_codes - codes),
+            "codes_source_inconnus": unknown,
             "exemples_inconnus": sorted(src_codes - codes)[:10],
-            "alerte": bool(codes) and matched / len(codes) < SEUIL_COUVERTURE,
+            "absence_vaut_zero": zero,
+            "alerte": alerte,
         }
         new_cols = [c for c in part.columns if c == "code" or c not in out.columns]
         out = out.merge(part[new_cols], on="code", how="left")
+        if zero:
+            value_cols = [c for c in new_cols if c != "code"]
+            out[value_cols] = out[value_cols].fillna(0.0)
     return out, report
 
 
@@ -163,7 +180,7 @@ def build(
     # L'altitude du fichier communal sert de repli ; un MNT configuré la remplace plus bas.
     if not get(cfg, "routage.mnt_geotiff"):
         stage("altitude", altitude)
-    table, report = assemble(communes, parts)
+    table, report = assemble(communes, parts, zero_si_absent={"sdes"})
 
     # Altitude de la commune (MNT) si disponible
     dem = None
@@ -216,8 +233,15 @@ def build(
     save_atlas(atlas, out_dir)
     log(f"Atlas écrit dans {out_dir}")
     for name, r in report.items():
-        flag = "  <-- COUVERTURE INSUFFISANTE" if r["alerte"] else ""
-        log(f"  {name}: {r['taux_couverture']:.1%} des communes{flag}")
+        if r.get("absence_vaut_zero"):
+            flag = "  <-- CODES INCONNUS, À VÉRIFIER" if r["alerte"] else ""
+            log(
+                f"  {name}: {r['taux_couverture']:.1%} des communes ont des données "
+                f"(les autres comptent 0) ; {r['codes_source_inconnus']} codes inconnus{flag}"
+            )
+        else:
+            flag = "  <-- COUVERTURE INSUFFISANTE" if r["alerte"] else ""
+            log(f"  {name}: {r['taux_couverture']:.1%} des communes{flag}")
     if dem is not None:
         dem.close()
     return atlas

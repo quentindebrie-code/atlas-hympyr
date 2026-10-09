@@ -204,3 +204,21 @@ def test_geocode_and_resolve_depots():
         resolve_depots([{"id": "a", "lat": 1, "lon": 1}, {"id": "a", "lat": 2, "lon": 2}], fake)
     with pytest.raises(ConfigError, match="adresse"):
         resolve_depots([{"nom": "D"}], fake)
+
+
+def test_assemble_absence_means_zero_for_sdes():
+    from atlas_hympyr.etl.build import assemble
+
+    communes = pd.DataFrame({"code": ["31001", "31002", "31003", "31004"]})
+    sdes = pd.DataFrame({"code": ["31001", "31002"], "pl_entreprises": [5.0, 2.0]})
+    insee = pd.DataFrame({"code": ["31001"], "rp_fioul": [9.0]})
+    out, rep = assemble(communes, {"sdes": sdes, "insee": insee}, zero_si_absent={"sdes"})
+    out = out.set_index("code")
+    assert out.loc["31004", "pl_entreprises"] == 0.0  # absent du parc = aucun poids lourd
+    assert pd.isna(out.loc["31002", "rp_fioul"])  # Insee : absent = inconnu, pas zéro
+    assert rep["sdes"]["alerte"] is False and rep["sdes"]["absence_vaut_zero"] is True
+    assert rep["insee"]["alerte"] is True  # 25 % de couverture seulement
+    # codes de la source inconnus de la liste des communes : vrai signal d'alerte
+    bad = pd.DataFrame({"code": ["99001", "99002", "31001"], "pl_entreprises": [1.0, 1.0, 1.0]})
+    _, rep = assemble(communes, {"sdes": bad}, zero_si_absent={"sdes"})
+    assert rep["sdes"]["alerte"] is True
