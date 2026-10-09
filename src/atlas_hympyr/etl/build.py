@@ -175,7 +175,9 @@ def build(
         table["altitude_m"] = dem.sample(table["lon"], table["lat"]).round(0)
         log("[mnt] altitude des communes échantillonnée")
 
-    depots = list(get(cfg, "depots", []) or [])
+    from atlas_hympyr.etl.geocodage import resolve_depots
+
+    depots = resolve_depots(list(get(cfg, "depots", []) or []), get_json, log)
     routes: dict[str, pd.DataFrame] = {}
     if not depots:
         log("[trajets] IGNORÉ : aucun dépôt dans config/settings.yaml (clé « depots »)")

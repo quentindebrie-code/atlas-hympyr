@@ -49,7 +49,8 @@ pytest                                                # 64 tests
    ```
 4. **RPG (GNR) : téléchargement manuel** (URL officielle non vérifiée), puis `sources.rpg`. Sans lui,
    le GNR est simplement indisponible.
-5. Renseigner les **coordonnées des dépôts** (`depots`) dans `config/settings.yaml`.
+5. Renseigner les **dépôts** (`depots`) dans `config/settings.yaml` : une `adresse` suffit, les
+   coordonnées sont retrouvées à la construction et l'adresse trouvée est affichée pour contrôle.
 6. Construire l'atlas (les étapes non configurées sont ignorées avec un message, `--strict` pour
    échouer) :
    ```bash

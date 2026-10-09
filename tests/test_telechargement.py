@@ -166,3 +166,41 @@ def test_repo_config_sdes_matches_real_file_format(tmp_path):
     assert out.loc["31555", "pl_entreprises"] == 13 and out.loc["31555", "pl_diesel_recents"] == 10
     assert out.loc["09001", "pl_entreprises"] == 2 and out.loc["09001", "pl_diesel_recents"] == 2
     assert "75056" not in out.index
+
+
+def test_geocode_and_resolve_depots():
+    from atlas_hympyr.etl.geocodage import resolve_depots
+
+    calls = []
+
+    def fake(url, params):
+        calls.append(url)
+        if "geopf" in url and "introuvable" in params["q"]:
+            return {"features": []}
+        score = 0.2 if "flou" in params["q"] else 0.93
+        return {
+            "features": [
+                {
+                    "geometry": {"type": "Point", "coordinates": [1.5, 43.8]},
+                    "properties": {"label": params["q"].upper(), "score": score},
+                }
+            ]
+        }
+
+    logs: list[str] = []
+    deps = resolve_depots(
+        [{"nom": "Dépôt Été", "adresse": "1 rue A"}, {"id": "x", "nom": "Fixe", "lat": 43.0, "lon": 1.0}],
+        fake,
+        logs.append,
+    )
+    assert deps[0]["id"] == "depot-ete" and deps[0]["lat"] == 43.8 and deps[0]["lon"] == 1.5
+    assert deps[1]["lat"] == 43.0 and len(calls) == 1 and "score 0.93" in logs[0]
+    # repli sur le second service quand le premier ne trouve rien
+    deps = resolve_depots([{"nom": "B", "adresse": "introuvable ici"}], fake, logs.append)
+    assert deps[0]["lat"] == 43.8 and calls[-1].startswith("https://api-adresse")
+    with pytest.raises(ConfigError, match="score"):
+        resolve_depots([{"nom": "C", "adresse": "flou"}], fake, logs.append)
+    with pytest.raises(ConfigError, match="double"):
+        resolve_depots([{"id": "a", "lat": 1, "lon": 1}, {"id": "a", "lat": 2, "lon": 2}], fake)
+    with pytest.raises(ConfigError, match="adresse"):
+        resolve_depots([{"nom": "D"}], fake)

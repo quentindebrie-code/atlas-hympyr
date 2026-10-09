@@ -6,10 +6,16 @@ perimetre:
   # Zone desservie : 7 départements (codes INSEE)
   departements: ["09", "11", "31", "32", "65", "81", "82"]
 
-# Dépôts de départ des tournées (coordonnées WGS84). À RENSEIGNER avec les dépôts réels.
-# Exemple (à ne pas laisser tel quel) :
-#   - {id: "depot-1", nom: "Dépôt principal", lat: 0.0, lon: 0.0}
-depots: []
+# Dépôts de départ des tournées. `adresse` suffit : les coordonnées sont retrouvées à la construction
+# (et l'adresse trouvée est affichée pour contrôle). On peut aussi donner lat/lon (WGS84) à la place.
+depots:
+  - {id: saint-sulpice, nom: "Saint-Sulpice (carburant, granulés)", adresse: "490 route de Toulouse 81370 Saint-Sulpice-la-Pointe"}
+  - {id: labastide-saint-sernin, nom: "Labastide-Saint-Sernin (carburant)", adresse: "11 allée des Tailladettes 31620 Labastide-Saint-Sernin"}
+  - {id: montrejeau, nom: "Montréjeau (carburant)", adresse: "21 avenue de Saint-Gaudens 31210 Montréjeau"}
+  - {id: lisle-sur-tarn, nom: "Lisle-sur-Tarn (granulés)", adresse: "227 rue du Capitaine Bastiani 81310 Lisle-sur-Tarn"}
+  - {id: saint-paul-cap-de-joux, nom: "Saint-Paul-Cap-de-Joux (lubrifiants et huiles)", adresse: "2 avenue du Relai 81220 Saint-Paul-Cap-de-Joux"}
+  - {id: villemur-sur-tarn, nom: "Villemur-sur-Tarn (carburant)", adresse: "Avenue Franklin Roosevelt 31330 Villemur-sur-Tarn"}
+  - {id: lannemezan, nom: "Lannemezan (carburant)", adresse: "Route de Tarbes 65300 Lannemezan"}
 
 routage:
   # "estimation" : distance à vol d'oiseau x coefficient de détour (hors ligne, approximatif)
